@@ -1,0 +1,132 @@
+package handler
+
+import (
+	"context"
+	"ecommerce_backend_project/er"
+	"ecommerce_backend_project/internal/mw/jwt"
+	"ecommerce_backend_project/pkg/auth/rbac"
+	"ecommerce_backend_project/pkg/auth/user"
+	model "ecommerce_backend_project/utils/models"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
+)
+
+type UserRoleHandler struct {
+	log             *logrus.Logger
+	jwtMiddleware   *jwt.GinJWTMiddleware
+	userRoleService *rbac.Service
+	userService     *user.Service
+}
+
+func newUserRoleHandler(
+	log *logrus.Logger,
+	userRoleService *rbac.Service,
+	userService *user.Service,
+) *UserRoleHandler {
+	c := &gin.Context{}
+	return &UserRoleHandler{
+		log,
+		jwt.SetAuthMiddleware(userService.Repo.GetDBConnection(c)),
+		userRoleService,
+		userService,
+	}
+}
+
+func (h *UserRoleHandler) CreateUserRole(c *gin.Context) {
+	var (
+		err  error
+		res  = model.GenericRes{}
+		req  = &rbac.Role{}
+		dCtx = context.Background()
+	)
+	defer func() {
+		if err != nil {
+			c.Error(err)
+			h.log.WithField("span", res).Warn(err.Error())
+			return
+		}
+	}()
+	if err = c.ShouldBind(&req); err != nil {
+		err = er.New(err, er.UncaughtException).SetStatus(http.StatusBadRequest)
+		return
+	}
+	go func() {
+		for {
+			select {
+			case err := <-h.userRoleService.ErrorChannel:
+				// Handle the error (e.g., log it, return it, etc.)
+				h.log.Error("Error:", err)
+			}
+		}
+	}()
+
+	err = h.userRoleService.CreateUserRole(dCtx, req)
+	if err != nil {
+		err = er.New(err, er.UncaughtException).SetStatus(http.StatusServiceUnavailable)
+		return
+	}
+	res.Data = req
+	res.Success = true
+	res.Message = "Sucessfully Created"
+	c.JSON(http.StatusCreated, res)
+}
+
+func (h *UserRoleHandler) RoleAssignment(c *gin.Context) {
+	var (
+		err  error
+		res  = model.GenericRes{}
+		req  = &rbac.UserRole{}
+		dCtx = context.Background()
+	)
+	defer func() {
+		if err != nil {
+			c.Error(err)
+			h.log.WithField("span", res).Warn(err.Error())
+			return
+		}
+	}()
+	if err = c.ShouldBind(&req); err != nil {
+		err = er.New(err, er.UncaughtException).SetStatus(http.StatusBadRequest)
+		return
+	}
+
+	err = h.userRoleService.AssignRole(dCtx, req)
+	if err != nil {
+		err = er.New(err, er.UncaughtException).SetStatus(http.StatusBadRequest)
+		return
+	}
+
+	res.Data = req
+	res.Success = true
+	res.Message = "Role Assigned Sucessfully"
+	c.JSON(http.StatusCreated, res)
+}
+
+func (h *UserRoleHandler) UserRoleAssignedDetails(c *gin.Context) {
+	var (
+		err  error
+		res  = model.GenericRes{}
+		req  = &rbac.UserRole{}
+		dCtx = context.Background()
+	)
+	defer func() {
+		if err != nil {
+			c.Error(err)
+			h.log.WithField("span", res).Warn(err.Error())
+			return
+		}
+	}()
+	userID, ok := c.Get("id") //take this value from user session
+	if !ok {
+		err = er.New(err, er.Unauthorized).SetStatus(http.StatusUnauthorized)
+		return
+	}
+	data, err := h.userRoleService.FetchUserRole(dCtx, userID)
+	if err != nil {
+		err = er.New(err, er.UserNotFound).SetStatus(http.StatusNotFound)
+		return
+	}
+
+}
