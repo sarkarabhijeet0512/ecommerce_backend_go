@@ -8,6 +8,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const (
+	AccessKeyEnv       = "AWS_ACCESS_KEY"
+	SecretAccessKey    = "AWS_SECRET_KEY"
+	SESAccessKeyEnv    = "SES_ACCESS_KEY"
+	SESSecretAccessKey = "SES_SECRET_KEY"
+	Region             = "AWS_REGION"
+	BucketName         = "AWS_BUCKET"
+)
+
 func HashPassword(password string) string {
 	bytes, _ := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes)

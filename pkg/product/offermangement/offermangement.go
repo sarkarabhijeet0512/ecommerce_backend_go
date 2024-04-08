@@ -17,7 +17,7 @@ var Module = fx.Options(
 type (
 	// Discount represents a discount applicable to a product
 	Discount struct {
-		DiscountID    int
+		ID            int
 		ProductID     int // Foreign key referencing Product entity
 		DiscountType  string
 		DiscountValue float64

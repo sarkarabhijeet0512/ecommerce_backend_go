@@ -7,6 +7,7 @@ import (
 
 	"ecommerce_backend_project/er"
 
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
 	"github.com/juju/ratelimit"
@@ -53,5 +54,13 @@ func RateLimiter(limit int64, duration time.Duration) gin.HandlerFunc {
 
 		// If no tokens available, return 429 Too Many Requests
 		c.AbortWithStatus(http.StatusTooManyRequests)
+	}
+}
+
+func AWSSessionAttach(sess *session.Session) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Set("sess", sess)
+
+		c.Next()
 	}
 }

@@ -17,11 +17,14 @@ var Module = fx.Options(
 type (
 	// Inventory represents the inventory of a product
 	Inventory struct {
-		InventoryID       int
-		ProductID         int // Foreign key referencing Product entity
-		StockLevel        int
-		ReorderThreshold  int // Threshold at which inventory needs to be reordered
-		ReorderQuantity   int // Quantity to reorder when inventory falls below threshold
-		LastRestockedDate time.Time
+		ID                int       `json:"id" pg:"id,pk"`
+		ProductID         int       `json:"product_id" pg:"product_id"`
+		StockLevel        int       `json:"stock_level" pg:"stock_level"`
+		ReorderThreshold  int       `json:"reorder_threshold" pg:"reorder_threshold"`
+		ReorderQuantity   int       `json:"reorder_quantity" pg:"reorder_quantity"`
+		LastRestockedDate time.Time `json:"last_restocked_date" pg:"last_restocked"`
+		IsActive          bool      `json:"is_active" pg:"is_active"`
+		CreatedAt         time.Time `json:"created_at" pg:"created_at"`
+		UpdatedAt         time.Time `json:"updated_at" pg:"updated_at"`
 	}
 )

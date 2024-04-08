@@ -4,6 +4,9 @@ import (
 	config "ecommerce_backend_project/config/product"
 	productServer "ecommerce_backend_project/internal/services/product"
 	"ecommerce_backend_project/internal/services/product/handler"
+	"ecommerce_backend_project/pkg/product/inventory"
+	productdetails "ecommerce_backend_project/pkg/product/productDetails"
+	"ecommerce_backend_project/pkg/product/reviews"
 	productDB "ecommerce_backend_project/utils/db/product"
 	"ecommerce_backend_project/utils/initialize"
 
@@ -21,6 +24,9 @@ func serverRun() {
 		initialize.Module,
 		productServer.Module,
 		handler.Module,
+		inventory.Module,
+		productdetails.Module,
+		reviews.Module,
 	)
 
 	// Run app forever
