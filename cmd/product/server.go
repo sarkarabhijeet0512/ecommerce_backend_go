@@ -1,8 +1,10 @@
 package main
 
 import (
-	product_server "ecommerce_backend_project/internal/services/product"
+	config "ecommerce_backend_project/config/product"
+	productServer "ecommerce_backend_project/internal/services/product"
 	"ecommerce_backend_project/internal/services/product/handler"
+	productDB "ecommerce_backend_project/utils/db/product"
 	"ecommerce_backend_project/utils/initialize"
 
 	"go.uber.org/fx"
@@ -12,11 +14,12 @@ func serverRun() {
 	app := fx.New(
 		fx.Provide(
 			// postgres server
-			initialize.NewDB,
+			productDB.NewDB,
+			initialize.NewRedisWorker,
 		),
-		// config.Module,
+		config.Module,
 		initialize.Module,
-		product_server.Module,
+		productServer.Module,
 		handler.Module,
 	)
 

@@ -1,4 +1,4 @@
-package dummy
+package reviews
 
 import (
 	"github.com/sirupsen/logrus"

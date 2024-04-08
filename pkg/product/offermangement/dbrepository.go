@@ -1,4 +1,4 @@
-package dummy
+package offermangement
 
 import (
 	"context"
@@ -17,7 +17,7 @@ type NewRepositoryIn struct {
 	fx.In
 
 	Log *logrus.Logger
-	DB  *pg.DB `name:"deliveryRiderDB"`
+	DB  *pg.DB `name:"productdb"`
 }
 
 // PGRepo is postgres implementation
@@ -38,7 +38,7 @@ func NewDBRepository(i NewRepositoryIn) (Repo Repository, err error) {
 	return
 }
 
-//IsActive checks if DB is connected
+// IsActive checks if DB is connected
 func (r *PGRepo) IsActive() (ok bool, err error) {
 
 	ctx := context.Background()
