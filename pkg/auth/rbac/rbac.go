@@ -1,7 +1,6 @@
 package rbac
 
 import (
-	"os/user"
 	"time"
 
 	"go.uber.org/fx"
@@ -22,7 +21,7 @@ type (
 		tableName      struct{}         `pg:"roles,discard_unknown_columns"`
 		ID             int              `json:"id" pg:"id"`
 		RoleName       string           `json:"role_name" pg:"role_name,unique"`
-		RolePermission []RolePermission `json:"role_permission" pg:"-"`
+		RolePermission []RolePermission `json:"role_permission" pg:"rel:has-many"`
 		IsActive       bool             `json:"is_active" pg:"is_active"`
 		CreatedAt      time.Time        `json:"created_at" pg:"created_at"`
 		UpdatedAt      time.Time        `json:"updated_at" pg:"updated_at"`
@@ -30,37 +29,40 @@ type (
 
 	// UserRole represents the many-to-many relationship between users and roles
 	UserRole struct {
-		tableName struct{}   `pg:"user_roles,discard_unknown_columns"`
-		ID        int        `json:"id" pg:"id"`
-		UserID    int        `json:"user_id" pg:"user_id,unique"`
-		User      *user.User `pg:"fk:user_id"`
-		RoleID    []int      `json:"role_id" pg:"role_id"`
-		IsActive  bool       `json:"is_active" pg:"is_active"`
-		CreatedAt time.Time  `json:"created_at" pg:"created_at"`
-		UpdatedAt time.Time  `json:"updated_at" pg:"updated_at"`
+		tableName struct{}  `pg:"user_roles,discard_unknown_columns"`
+		ID        int       `json:"id" pg:"id"`
+		UserID    int       `json:"user_id" pg:"user_id,unique"`
+		RoleID    []int     `json:"role_id" pg:"role_id"`
+		Roles     []*Role   `json:"roles,omitempty" pg:"rel:has-many"`
+		IsActive  bool      `json:"is_active" pg:"is_active"`
+		CreatedAt time.Time `json:"created_at" pg:"created_at"`
+		UpdatedAt time.Time `json:"updated_at" pg:"updated_at"`
 	}
 
 	// Resource represents the resource entity
 	Resource struct {
-		tableName    struct{}  `pg:"resources,discard_unknown_columns"`
-		ID           int       `json:"id" pg:"id"`
-		ResourceName string    `json:"resource_name" pg:"resource_name"`
-		IsActive     bool      `json:"is_active" pg:"is_active"`
-		CreatedAt    time.Time `json:"created_at" pg:"created_at"`
-		UpdatedAt    time.Time `json:"updated_at" pg:"updated_at"`
+		tableName      struct{}        `pg:"resources,discard_unknown_columns"`
+		ID             int             `json:"id" pg:"id"`
+		ResourceName   string          `json:"resource_name" pg:"resource_name"`
+		Role           *Role           `json:"role,omitempty" pg:"rel:belongs-to"`
+		IsActive       bool            `json:"is_active" pg:"is_active"`
+		CreatedAt      time.Time       `json:"created_at" pg:"created_at"`
+		UpdatedAt      time.Time       `json:"updated_at" pg:"updated_at"`
+		RolePermission *RolePermission `json:"role_permission,omitempty" pg:"rel:belongs-to"`
 	}
 
 	// Permission represents the permission entity
 	Permission struct {
-		tableName struct{}  `pg:"permissions,discard_unknown_columns"`
-		ID        int       `json:"id" pg:"id"`
-		Read      bool      `json:"read" pg:"read,default:false"`
-		Write     bool      `json:"write" pg:"write,default:false"`
-		Edit      bool      `json:"edit" pg:"edit,default:false"`
-		Remove    bool      `json:"remove" pg:"remove,default:false"`
-		IsActive  bool      `json:"is_active" pg:"is_active,default:true"`
-		CreatedAt time.Time `json:"created_at" pg:"created_at"`
-		UpdatedAt time.Time `json:"updated_at" pg:"updated_at"`
+		tableName      struct{}        `pg:"permissions,discard_unknown_columns"`
+		ID             int             `json:"id" pg:"id"`
+		Read           bool            `json:"read" pg:"read,default:false"`
+		Write          bool            `json:"write" pg:"write,default:false"`
+		Edit           bool            `json:"edit" pg:"edit,default:false"`
+		Remove         bool            `json:"remove" pg:"remove,default:false"`
+		RolePermission *RolePermission `json:"role_permission,omitempty" pg:"rel:belongs-to"`
+		IsActive       bool            `json:"is_active" pg:"is_active,default:true"`
+		CreatedAt      time.Time       `json:"created_at" pg:"created_at"`
+		UpdatedAt      time.Time       `json:"updated_at" pg:"updated_at"`
 	}
 
 	// RolePermission represents the many-to-many relationship between roles and permissions
@@ -68,11 +70,11 @@ type (
 		tableName    struct{}    `pg:"role_permissions,discard_unknown_columns"`
 		ID           int         `json:"id" pg:"id"`
 		RoleID       int         `json:"role_id" pg:"role_id"`
-		Role         *Role       `pg:"fk:role_id"`
 		PermissionID int         `json:"permission_id" pg:"permission_id"`
-		Permission   *Permission `json:"permission,omitempty" pg:"fk:permission_id"`
 		ResourceID   int         `json:"resourse_id" pg:"resourse_id"`
-		Resource     *Resource   `json:"resourse,omitempty" pg:"fk:resourse_id"`
+		Role         *Role       `json:"role,omitempty" pg:"rel:has-one"`       // Relationship with Role struct
+		Permission   *Permission `json:"permission,omitempty" pg:"rel:has-one"` // Relationship with Permission struct
+		Resource     []*Resource `json:"resourse" pg:"rel:has-many"`            // Relationship with Resource struct
 		IsActive     bool        `json:"is_active" pg:"is_active"`
 		CreatedAt    time.Time   `json:"created_at" pg:"created_at"`
 		UpdatedAt    time.Time   `json:"updated_at" pg:"updated_at"`

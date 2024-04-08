@@ -14,7 +14,9 @@ func v1Routes(router *gin.RouterGroup, authMiddleware *jwt.GinJWTMiddleware, o *
 	r.PUT("/user_registration", o.UserHandler.UserRegistration)
 	r.POST("/user_login", o.UserHandler.UserLogin)
 	// RBAC
-	r.PUT("/user_role", o.UserRoleHandler.CreateUserRole)
-	r.POST("/assign_role", o.UserRoleHandler.RoleAssignment)
+	r.PUT("/user_role", authMiddleware.MiddlewareFunc(), o.UserRoleHandler.CreateUserRole)
+	r.POST("/assign_role", authMiddleware.MiddlewareFunc(), o.UserRoleHandler.RoleAssignment)
 	r.GET("/user/assigned_role", authMiddleware.MiddlewareFunc(), o.UserRoleHandler.UserRoleAssignedDetails)
+	r.GET("/role_details/:role_id", authMiddleware.MiddlewareFunc(), o.UserRoleHandler.RoleDetails)
+	r.GET("/role_list", authMiddleware.MiddlewareFunc(), o.UserRoleHandler.RoleList)
 }

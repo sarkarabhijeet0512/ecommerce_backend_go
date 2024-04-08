@@ -15,6 +15,9 @@ type Repository interface {
 	upsertRolePermission(context.Context, *RolePermission) error
 	upsertPermission(context.Context, *Permission) error
 	upsertAssignRole(dCtx context.Context, r *UserRole) error
+	fetchUserRole(dCtx context.Context, userID any) ([]UserRole, error)
+	fetchRole(dCtx context.Context, roleID int) ([]Role, error)
+	fetchALLRoles(dCtx context.Context) ([]Role, error)
 }
 
 // NewRepositoryIn is function param struct of func `NewRepository`
@@ -34,12 +37,10 @@ type PGRepo struct {
 // NewDBRepository returns a new persistence layer object which can be used for
 // CRUD on db
 func NewDBRepository(i NewRepositoryIn) (Repo Repository, err error) {
-
 	Repo = &PGRepo{
 		log: i.Log,
 		db:  i.DB,
 	}
-
 	return
 }
 
@@ -63,4 +64,32 @@ func (r *PGRepo) upsertAssignRole(dCtx context.Context, userRole *UserRole) erro
 	utils.SetGenericFieldValue(userRole)
 	_, err := r.db.ModelContext(dCtx, userRole).OnConflict("(user_id) DO UPDATE").Insert()
 	return err
+}
+
+func (r *PGRepo) fetchUserRole(dCtx context.Context, userID any) ([]UserRole, error) {
+	var role []UserRole
+	err := r.db.ModelContext(dCtx, &role).
+		Relation("Roles").                           // Include RolePermissions for each Role
+		Relation("Roles.RolePermission").            // Include Permissions for each RolePermission
+		Relation("Roles.RolePermission.Permission"). // Include Resources for each RolePermission
+		Relation("Roles.RolePermission.Resource").   // Include Resources for each RolePermission                    // Include UserRoles for each Role
+		Where("user_role.user_id = ?", userID).      // Add WHERE condition
+		Select()
+	return role, err
+}
+
+func (r *PGRepo) fetchRole(dCtx context.Context, roleID int) ([]Role, error) {
+	var role []Role
+	err := r.db.ModelContext(dCtx, &role).
+		Relation("RolePermission").
+		Relation("RolePermission.Permission").
+		Relation("RolePermission.Resource").
+		Where("role.id = ? ", roleID). // Add WHERE condition
+		Select()
+	return role, err
+}
+func (r *PGRepo) fetchALLRoles(dCtx context.Context) ([]Role, error) {
+	var role []Role
+	err := r.db.ModelContext(dCtx, &role).Select()
+	return role, err
 }

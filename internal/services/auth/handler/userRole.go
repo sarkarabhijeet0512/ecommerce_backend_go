@@ -7,7 +7,9 @@ import (
 	"ecommerce_backend_project/pkg/auth/rbac"
 	"ecommerce_backend_project/pkg/auth/user"
 	model "ecommerce_backend_project/utils/models"
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
@@ -106,9 +108,9 @@ func (h *UserRoleHandler) RoleAssignment(c *gin.Context) {
 
 func (h *UserRoleHandler) UserRoleAssignedDetails(c *gin.Context) {
 	var (
-		err  error
-		res  = model.GenericRes{}
-		req  = &rbac.UserRole{}
+		err error
+		res = model.GenericRes{}
+		// req  = &rbac.UserRole{}
 		dCtx = context.Background()
 	)
 	defer func() {
@@ -128,5 +130,61 @@ func (h *UserRoleHandler) UserRoleAssignedDetails(c *gin.Context) {
 		err = er.New(err, er.UserNotFound).SetStatus(http.StatusNotFound)
 		return
 	}
-
+	res.Data = data
+	res.Message = "Success"
+	res.Success = true
+	c.JSON(http.StatusOK, res)
+}
+func (h *UserRoleHandler) RoleDetails(c *gin.Context) {
+	var (
+		err error
+		res = model.GenericRes{}
+		// req  = &rbac.UserRole{}
+		dCtx = context.Background()
+	)
+	defer func() {
+		if err != nil {
+			c.Error(err)
+			h.log.WithField("span", res).Warn(err.Error())
+			return
+		}
+	}()
+	roleID, err := strconv.Atoi(fmt.Sprint(c.Param("role_id")))
+	if err != nil {
+		h.log.WithField("span", roleID).Info("error while converting string to int: " + err.Error())
+		return
+	}
+	data, err := h.userRoleService.FetchRole(dCtx, roleID)
+	if err != nil {
+		err = er.New(err, er.UserNotFound).SetStatus(http.StatusNotFound)
+		return
+	}
+	res.Data = data
+	res.Message = "Success"
+	res.Success = true
+	c.JSON(http.StatusOK, res)
+}
+func (h *UserRoleHandler) RoleList(c *gin.Context) {
+	var (
+		err error
+		res = model.GenericRes{}
+		// req  = &rbac.UserRole{}
+		dCtx = context.Background()
+	)
+	defer func() {
+		if err != nil {
+			c.Error(err)
+			h.log.WithField("span", res).Warn(err.Error())
+			return
+		}
+	}()
+	data, err := h.userRoleService.FetchAllRoles(dCtx)
+	if err != nil {
+		err = er.New(err, er.UserNotFound).SetStatus(http.StatusNotFound)
+		return
+	}
+	res.Data = data
+	res.Message = "Success"
+	res.Success = true
+	c.JSON(http.StatusOK, res)
 }

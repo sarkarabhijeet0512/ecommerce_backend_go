@@ -48,3 +48,13 @@ func (s *Service) CreateUserRole(dCtx context.Context, r *Role) error {
 func (s *Service) AssignRole(dCtx context.Context, r *UserRole) error {
 	return s.Repo.upsertAssignRole(dCtx, r)
 }
+func (s *Service) FetchUserRole(dCtx context.Context, userID any) ([]UserRole, error) {
+	return s.Repo.fetchUserRole(dCtx, userID)
+}
+
+func (s *Service) FetchRole(dCtx context.Context, roleID int) ([]Role, error) {
+	return s.Repo.fetchRole(dCtx, roleID)
+}
+func (s *Service) FetchAllRoles(dCtx context.Context) ([]Role, error) {
+	return s.Repo.fetchALLRoles(dCtx)
+}

@@ -18,7 +18,7 @@ type (
 	// User represents the user entity
 	User struct {
 		tableName        struct{}  `pg:"users,discard_unknown_columns"`
-		ID               int       `json:"id" pg:"id"`
+		ID               int       `json:"id" pg:"id,pk"`
 		Username         string    `json:"username" pg:"username"`
 		Password         string    `json:"password" pg:"password"`
 		Email            string    `json:"email" pg:"email,unique"`
