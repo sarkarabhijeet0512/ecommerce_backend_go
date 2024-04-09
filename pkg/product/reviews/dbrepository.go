@@ -2,6 +2,7 @@ package reviews
 
 import (
 	"context"
+	model "ecommerce_backend_project/utils/models"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/sirupsen/logrus"
@@ -9,7 +10,8 @@ import (
 )
 
 type Repository interface {
-	IsActive() (ok bool, err error)
+	updateReviewByProductID(context.Context, *Review) error
+	fetchReviewByFilter(context.Context, *model.Filter) ([]Review, error)
 }
 
 // NewRepositoryIn is function param struct of func `NewRepository`
@@ -38,13 +40,19 @@ func NewDBRepository(i NewRepositoryIn) (Repo Repository, err error) {
 	return
 }
 
-// IsActive checks if DB is connected
-func (r *PGRepo) IsActive() (ok bool, err error) {
-
-	ctx := context.Background()
-	err = r.db.Ping(ctx)
-	if err == nil {
-		ok = true
+func (r *PGRepo) updateReviewByProductID(ctx context.Context, review *Review) error {
+	_, err := r.db.ModelContext(ctx, review).OnConflict("(user_id, product_id) DO UPDATE").Insert()
+	return err
+}
+func (r *PGRepo) fetchReviewByFilter(ctx context.Context, filter *model.Filter) ([]Review, error) {
+	reviews := []Review{}
+	query := r.db.ModelContext(ctx, &reviews)
+	if filter != nil && filter.ProductID != 0 {
+		query.Where("product_id = ?", filter.ProductID)
 	}
-	return
+	if filter != nil && filter.UserID != 0 {
+		query.Where("user_id = ?", filter.UserID)
+	}
+	err := query.Select()
+	return reviews, err
 }

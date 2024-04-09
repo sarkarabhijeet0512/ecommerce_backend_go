@@ -5,6 +5,7 @@ import (
 	"ecommerce_backend_project/internal/mw/aws"
 	"ecommerce_backend_project/internal/mw/jwt"
 	"ecommerce_backend_project/internal/services/product/handler"
+	"ecommerce_backend_project/pkg/cache"
 	"ecommerce_backend_project/utils"
 	"fmt"
 	"net/http"
@@ -38,6 +39,7 @@ type Options struct {
 	Log                   *logrus.Logger
 	PostgresDB            *pg.DB      `name:"productdb"`
 	Redis                 *redis.Pool `name:"redisWorker"`
+	CacheService          *cache.Service
 	ProductDetailsHandler *handler.ProductDetailsHandler
 	ReviewsHandler        *handler.ReviewsHandler
 	InventoryHandler      *handler.InventoryHandler
@@ -60,6 +62,8 @@ func SetupRouter(o *Options) (router *gin.Engine) {
 	// Health routes
 	router.Use(mw.RateLimiter(10, time.Minute))
 	authMiddleware := jwt.SetAuthMiddleware(o.PostgresDB)
+	router.Use(mw.ErrorHandlerX(o.Log))
+	router.Use(mw.RoleCheckMiddleware(o.CacheService, utils.ProductRole))
 	router.GET("/_healthz", HealthHandler(o))
 	router.GET("/_readyz", HealthHandler(o))
 	accessKeyID := o.Config.GetString(utils.AccessKeyEnv)

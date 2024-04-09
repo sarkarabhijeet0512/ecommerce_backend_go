@@ -20,4 +20,11 @@ type (
 		Link      string `form:"link" json:"link"`
 		UserID    int    `form:"user_id" json:"user_id"`
 	}
+	Filter struct {
+		ProductID int `form:"product_id"`
+		UserID    int `form:"user_id"`
+	}
+	UserRoles struct {
+		Resource []string `json:"resource" pg:"resource"`
+	}
 )

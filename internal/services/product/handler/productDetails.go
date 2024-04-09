@@ -53,6 +53,7 @@ func (h *ProductDetailsHandler) UpsertProductDetails(c *gin.Context) {
 		res.Message = err.Error()
 		return
 	}
+
 	err = h.productdetailsService.UpsertProductDetails(dCtx, req)
 	if err != nil {
 		err = er.New(err, er.UncaughtException).SetStatus(http.StatusUnprocessableEntity)

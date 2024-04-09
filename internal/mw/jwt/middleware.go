@@ -104,3 +104,8 @@ func SetAuthMiddleware(db *pg.DB) *GinJWTMiddleware {
 	}
 	return authMiddleware
 }
+
+func RoleAccess(db *pg.DB, role, user int) bool {
+
+	return true
+}

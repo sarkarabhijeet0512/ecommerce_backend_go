@@ -18,8 +18,8 @@ type (
 	// Review represents a user review for a product
 	Review struct {
 		ID         int       `json:"id" pg:"id"`
-		ProductID  int       `json:"product_id" pg:"product_id"`
-		UserID     int       `json:"user_id" pg:"user_id"`
+		ProductID  int       `json:"product_id" pg:"product_id,unique"`
+		UserID     int       `json:"user_id" pg:"user_id,unique"`
 		Rating     float64   `json:"rating" pg:"rating"`
 		Comment    string    `json:"comment" pg:"comment"`
 		ReviewDate time.Time `json:"review_date" pg:"review_date"`

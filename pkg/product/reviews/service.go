@@ -1,6 +1,9 @@
 package reviews
 
 import (
+	"context"
+	model "ecommerce_backend_project/utils/models"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -20,7 +23,9 @@ func NewService(conf *viper.Viper, log *logrus.Logger, Repo Repository) *Service
 	}
 }
 
-// IsDBActive gets user data by her userID
-func (s *Service) IsActive() (bool, error) {
-	return s.Repo.IsActive()
+func (s *Service) UpdateReviewByProductID(ctx context.Context, review *Review) error {
+	return s.Repo.updateReviewByProductID(ctx, review)
+}
+func (s *Service) FetchReviewByFilter(ctx context.Context, filter *model.Filter) ([]Review, error) {
+	return s.Repo.fetchReviewByFilter(ctx, filter)
 }
