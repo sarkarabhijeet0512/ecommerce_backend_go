@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	productdetails "ecommerce_backend_project/pkg/product/productDetails"
 	"fmt"
 	"os"
 
@@ -73,6 +74,10 @@ func postgresqlInit(dbName, dbUser, dbPassword, dbHost, dbPort string, log *logr
 			Database: dbName,
 			OnConnect: func(ctx context.Context, db *pg.Conn) error {
 				_, err := db.Exec("SET timezone = 'Asia/Calcutta'")
+				if err != nil {
+					return err
+				}
+				_, err = db.Exec("SET CONSTRAINTS ALL DEFERRED")
 				return err
 			},
 		},
@@ -105,7 +110,12 @@ func postgresqlInit(dbName, dbUser, dbPassword, dbHost, dbPort string, log *logr
 }
 
 func createSchema(db *pg.DB) error {
-	models := []interface{}{}
+	models := []interface{}{
+		(*productdetails.Product)(nil),
+		(*productdetails.ProductVariant)(nil),
+		(*productdetails.Dimensions)(nil),
+		(*productdetails.Category)(nil),
+	}
 
 	for _, model := range models {
 		err := db.Model(model).CreateTable(&orm.CreateTableOptions{

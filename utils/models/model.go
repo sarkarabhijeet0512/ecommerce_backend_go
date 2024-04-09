@@ -15,20 +15,9 @@ type (
 		Data    interface{} `json:"data"`
 		Meta    interface{} `json:"meta,omitempty"`
 	}
-	// Role struct {
-	// 	RoleName       string           `json:"role_name"`
-	// 	RolePermission []RolePermission `json:"role_permission"`
-	// }
-	// Permission struct {
-	// 	Read   bool   `json:"read"`
-	// 	Write  bool   `json:"write"`
-	// 	Edit   bool   `json:"edit"`
-	// 	Remove string `json:"remove"`
-	// }
-	// RolePermission struct {
-	// 	RoleID       int         `json:"role_id"`
-	// 	PermissionID int         `json:"permission_id"`
-	// 	Permission   *Permission `json:"permission"`
-	// 	ResourseID   int         `json:"resourse_id"`
-	// }
+	UploadImagesReq struct {
+		ProductID int    `form:"product_id" pg:"product_id" binding:"required"`
+		Link      string `form:"link" json:"link"`
+		UserID    int    `form:"user_id" json:"user_id"`
+	}
 )
