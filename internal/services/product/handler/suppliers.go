@@ -4,8 +4,8 @@ import (
 	"context"
 	"ecommerce_backend_project/er"
 	"ecommerce_backend_project/internal/mw/jwt"
-	"ecommerce_backend_project/pkg/product/inventory"
 	productdetails "ecommerce_backend_project/pkg/product/productDetails"
+	"ecommerce_backend_project/pkg/product/suppliers"
 	model "ecommerce_backend_project/utils/models"
 	"net/http"
 
@@ -13,32 +13,33 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type InventoryHandler struct {
+type SupplierHandler struct {
 	log                   *logrus.Logger
 	jwtMiddleware         *jwt.GinJWTMiddleware
-	invertoryService      *inventory.Service
+	supplierService       *suppliers.Service
 	productdetailsService *productdetails.Service
 }
 
-func newInventoryHandler(
+func newSupplierHandler(
 	log *logrus.Logger,
-	invertoryService *inventory.Service,
+	supplierService *suppliers.Service,
 	productdetailsService *productdetails.Service,
-) *InventoryHandler {
+) *SupplierHandler {
 	c := &gin.Context{}
-	return &InventoryHandler{
+	return &SupplierHandler{
 		log,
 		jwt.SetAuthMiddleware(productdetailsService.Repo.GetDBConnection(c)),
-		invertoryService,
+		supplierService,
 		productdetailsService,
 	}
 }
 
-func (h *InventoryHandler) UpsertInventory(c *gin.Context) {
+func (h *SupplierHandler) UpsertSuppliers(c *gin.Context) {
+
 	var (
 		err  error
 		res  = &model.GenericRes{}
-		req  = &productdetails.Product{}
+		req  = &suppliers.Supplier{}
 		dCtx = context.Background()
 	)
 	defer func() {
@@ -54,7 +55,7 @@ func (h *InventoryHandler) UpsertInventory(c *gin.Context) {
 		return
 	}
 
-	err = h.invertoryService.UpsertInventory(dCtx, req)
+	err = h.supplierService.UpsertSuppliers(dCtx, req)
 	if err != nil {
 		err = er.New(err, er.UncaughtException).SetStatus(http.StatusServiceUnavailable)
 		return
@@ -65,11 +66,12 @@ func (h *InventoryHandler) UpsertInventory(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-func (h *InventoryHandler) FetchInventory(c *gin.Context) {
+func (h *SupplierHandler) FetchSuppliers(c *gin.Context) {
+
 	var (
 		err  error
 		res  = &model.GenericRes{}
-		req  = &productdetails.Product{}
+		req  = model.Filter{}
 		dCtx = context.Background()
 	)
 	defer func() {
@@ -84,13 +86,14 @@ func (h *InventoryHandler) FetchInventory(c *gin.Context) {
 		res.Message = err.Error()
 		return
 	}
-	err = h.invertoryService.FetchInventoryByFilter(dCtx, req)
+
+	data, err := h.supplierService.FetchSuppliersByFilter(dCtx, req)
 	if err != nil {
 		err = er.New(err, er.UncaughtException).SetStatus(http.StatusServiceUnavailable)
 		return
 	}
 	res.Message = "Success"
-	res.Data = req
+	res.Data = data
 	res.Success = true
 	c.JSON(http.StatusOK, res)
 }

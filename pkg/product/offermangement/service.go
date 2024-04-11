@@ -1,6 +1,8 @@
 package offermangement
 
 import (
+	"context"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -21,6 +23,6 @@ func NewService(conf *viper.Viper, log *logrus.Logger, Repo Repository) *Service
 }
 
 // IsDBActive gets user data by her userID
-func (s *Service) IsActive() (bool, error) {
-	return s.Repo.IsActive()
+func (s *Service) UpsertOfferDetails(ctx context.Context, discount *Discount) error {
+	return s.Repo.upsertOfferDetails(ctx, discount)
 }

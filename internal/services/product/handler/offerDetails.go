@@ -4,8 +4,9 @@ import (
 	"context"
 	"ecommerce_backend_project/er"
 	"ecommerce_backend_project/internal/mw/jwt"
-	"ecommerce_backend_project/pkg/product/inventory"
+	"ecommerce_backend_project/pkg/product/offermangement"
 	productdetails "ecommerce_backend_project/pkg/product/productDetails"
+	"ecommerce_backend_project/pkg/product/suppliers"
 	model "ecommerce_backend_project/utils/models"
 	"net/http"
 
@@ -13,32 +14,33 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type InventoryHandler struct {
+type OfferHandler struct {
 	log                   *logrus.Logger
 	jwtMiddleware         *jwt.GinJWTMiddleware
-	invertoryService      *inventory.Service
+	offerService          *offermangement.Service
 	productdetailsService *productdetails.Service
 }
 
-func newInventoryHandler(
+func newOfferHandler(
 	log *logrus.Logger,
-	invertoryService *inventory.Service,
+	offerService *offermangement.Service,
 	productdetailsService *productdetails.Service,
-) *InventoryHandler {
+) *OfferHandler {
 	c := &gin.Context{}
-	return &InventoryHandler{
+	return &OfferHandler{
 		log,
 		jwt.SetAuthMiddleware(productdetailsService.Repo.GetDBConnection(c)),
-		invertoryService,
+		offerService,
 		productdetailsService,
 	}
 }
 
-func (h *InventoryHandler) UpsertInventory(c *gin.Context) {
+func (h *OfferHandler) UpsertOfferDetails(c *gin.Context) {
+
 	var (
 		err  error
 		res  = &model.GenericRes{}
-		req  = &productdetails.Product{}
+		req  = &offermangement.Discount{}
 		dCtx = context.Background()
 	)
 	defer func() {
@@ -54,7 +56,7 @@ func (h *InventoryHandler) UpsertInventory(c *gin.Context) {
 		return
 	}
 
-	err = h.invertoryService.UpsertInventory(dCtx, req)
+	err = h.offerService.UpsertOfferDetails(dCtx, req)
 	if err != nil {
 		err = er.New(err, er.UncaughtException).SetStatus(http.StatusServiceUnavailable)
 		return
@@ -65,11 +67,12 @@ func (h *InventoryHandler) UpsertInventory(c *gin.Context) {
 	c.JSON(http.StatusOK, res)
 }
 
-func (h *InventoryHandler) FetchInventory(c *gin.Context) {
+func (h *OfferHandler) FetchOfferDetails(c *gin.Context) {
+
 	var (
 		err  error
 		res  = &model.GenericRes{}
-		req  = &productdetails.Product{}
+		req  = &suppliers.Supplier{}
 		dCtx = context.Background()
 	)
 	defer func() {
@@ -84,7 +87,8 @@ func (h *InventoryHandler) FetchInventory(c *gin.Context) {
 		res.Message = err.Error()
 		return
 	}
-	err = h.invertoryService.FetchInventoryByFilter(dCtx, req)
+
+	err = h.offerService.FetchOfferByFilter(dCtx, req)
 	if err != nil {
 		err = er.New(err, er.UncaughtException).SetStatus(http.StatusServiceUnavailable)
 		return

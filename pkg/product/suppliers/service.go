@@ -1,6 +1,9 @@
 package suppliers
 
 import (
+	"context"
+	model "ecommerce_backend_project/utils/models"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -20,7 +23,10 @@ func NewService(conf *viper.Viper, log *logrus.Logger, Repo Repository) *Service
 	}
 }
 
-// IsDBActive gets user data by her userID
-func (s *Service) IsActive() (bool, error) {
-	return s.Repo.IsActive()
+func (s *Service) UpsertSuppliers(ctx context.Context, suppliers *Supplier) error {
+	return s.Repo.upsertSuppliers(ctx, suppliers)
+}
+
+func (s *Service) FetchSuppliersByFilter(ctx context.Context, Filter model.Filter) (suppliers []Supplier, err error) {
+	return s.Repo.fetchSuppliers(ctx, Filter)
 }

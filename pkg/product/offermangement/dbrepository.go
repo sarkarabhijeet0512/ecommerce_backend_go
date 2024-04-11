@@ -9,7 +9,7 @@ import (
 )
 
 type Repository interface {
-	IsActive() (ok bool, err error)
+	upsertOfferDetails(ctx context.Context, discount *Discount) error
 }
 
 // NewRepositoryIn is function param struct of func `NewRepository`
@@ -39,12 +39,6 @@ func NewDBRepository(i NewRepositoryIn) (Repo Repository, err error) {
 }
 
 // IsActive checks if DB is connected
-func (r *PGRepo) IsActive() (ok bool, err error) {
-
-	ctx := context.Background()
-	err = r.db.Ping(ctx)
-	if err == nil {
-		ok = true
-	}
-	return
+func (r *PGRepo) upsertOfferDetails(ctx context.Context, discount *Discount) error {
+	return nil
 }

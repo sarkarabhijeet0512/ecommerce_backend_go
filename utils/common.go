@@ -17,7 +17,6 @@ const (
 	SESSecretAccessKey = "SES_SECRET_KEY"
 	Region             = "AWS_REGION"
 	BucketName         = "AWS_BUCKET"
-	ProductRole        = "product_management"
 )
 
 func HashPassword(password string) string {

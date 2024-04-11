@@ -67,7 +67,7 @@ func AWSSessionAttach(sess *session.Session) gin.HandlerFunc {
 		c.Next()
 	}
 }
-func RoleCheckMiddleware(rdb *cache.Service, role string) gin.HandlerFunc {
+func RoleCheckMiddleware(rdb *cache.Service, role int) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID, ok := c.Get("id")
 		if !ok {
@@ -88,11 +88,8 @@ func RoleCheckMiddleware(rdb *cache.Service, role string) gin.HandlerFunc {
 			}
 		}
 		if !roleFound {
-			err := errors.New("Role not found")
-			err = er.New(err, er.Unauthorized).SetStatus(http.StatusUnauthorized)
+			er.New(errors.New("invalid access"), er.Unauthorized).SetStatus(http.StatusUnauthorized)
 			c.Abort()
-			// c.JSON(http.StatusForbidden, gin.H{"error": "Insufficient permissions"})
-			// c.Abort()
 			return
 		}
 		c.Next()

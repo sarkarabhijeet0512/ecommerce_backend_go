@@ -25,6 +25,6 @@ type (
 		UserID    int `form:"user_id"`
 	}
 	UserRoles struct {
-		Resource []string `json:"resource" pg:"resource"`
+		Resource []int `json:"resource_id" pg:"resource_id"`
 	}
 )

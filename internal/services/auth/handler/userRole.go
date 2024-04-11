@@ -7,7 +7,6 @@ import (
 	"ecommerce_backend_project/pkg/auth/rbac"
 	"ecommerce_backend_project/pkg/auth/user"
 	model "ecommerce_backend_project/utils/models"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -149,7 +148,7 @@ func (h *UserRoleHandler) RoleDetails(c *gin.Context) {
 			return
 		}
 	}()
-	roleID, err := strconv.Atoi(fmt.Sprint(c.Param("role_id")))
+	roleID, err := strconv.Atoi(c.Param("role_id"))
 	if err != nil {
 		h.log.WithField("span", roleID).Info("error while converting string to int: " + err.Error())
 		return

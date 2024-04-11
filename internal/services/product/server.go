@@ -7,6 +7,7 @@ import (
 	"ecommerce_backend_project/internal/services/product/handler"
 	"ecommerce_backend_project/pkg/cache"
 	"ecommerce_backend_project/utils"
+	"ecommerce_backend_project/utils/types"
 	"fmt"
 	"net/http"
 	"time"
@@ -43,6 +44,8 @@ type Options struct {
 	ProductDetailsHandler *handler.ProductDetailsHandler
 	ReviewsHandler        *handler.ReviewsHandler
 	InventoryHandler      *handler.InventoryHandler
+	OfferHandler          *handler.OfferHandler
+	SupplierHandler       *handler.SupplierHandler
 }
 
 // Run starts the mainserver REST API server
@@ -63,7 +66,7 @@ func SetupRouter(o *Options) (router *gin.Engine) {
 	router.Use(mw.RateLimiter(10, time.Minute))
 	authMiddleware := jwt.SetAuthMiddleware(o.PostgresDB)
 	router.Use(mw.ErrorHandlerX(o.Log))
-	router.Use(mw.RoleCheckMiddleware(o.CacheService, utils.ProductRole))
+	router.Use(mw.RoleCheckMiddleware(o.CacheService, types.PRODUCTMANAGEMENT))
 	router.GET("/_healthz", HealthHandler(o))
 	router.GET("/_readyz", HealthHandler(o))
 	accessKeyID := o.Config.GetString(utils.AccessKeyEnv)

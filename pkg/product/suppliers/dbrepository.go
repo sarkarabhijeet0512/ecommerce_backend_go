@@ -2,6 +2,7 @@ package suppliers
 
 import (
 	"context"
+	model "ecommerce_backend_project/utils/models"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/sirupsen/logrus"
@@ -9,7 +10,8 @@ import (
 )
 
 type Repository interface {
-	IsActive() (ok bool, err error)
+	upsertSuppliers(ctx context.Context, suppliers *Supplier) error
+	fetchSuppliers(ctx context.Context, Filter model.Filter) (suppliers []Supplier, err error)
 }
 
 // NewRepositoryIn is function param struct of func `NewRepository`
@@ -39,12 +41,10 @@ func NewDBRepository(i NewRepositoryIn) (Repo Repository, err error) {
 }
 
 // IsActive checks if DB is connected
-func (r *PGRepo) IsActive() (ok bool, err error) {
+func (r *PGRepo) upsertSuppliers(ctx context.Context, suppliers *Supplier) error {
+	return nil
+}
 
-	ctx := context.Background()
-	err = r.db.Ping(ctx)
-	if err == nil {
-		ok = true
-	}
-	return
+func (r *PGRepo) fetchSuppliers(ctx context.Context, Filter model.Filter) (suppliers []Supplier, err error) {
+	return nil, nil
 }
