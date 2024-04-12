@@ -8,5 +8,7 @@ var Module = fx.Options(
 		newInventoryHandler,
 		newProductDetailsHandler,
 		newReviewsHandler,
+		newOfferHandler,
+		newSupplierHandler,
 	),
 )

@@ -21,8 +21,10 @@ type (
 		UserID    int    `form:"user_id" json:"user_id"`
 	}
 	Filter struct {
-		ProductID int `form:"product_id"`
-		UserID    int `form:"user_id"`
+		ProductID  int    `form:"product_id" json:"product_id"`
+		UserID     int    `form:"user_id" json:"user_id"`
+		CouponCode string `form:"coupon_code" json:"coupon_code"`
+		SupplierID int    `form:"supplier_id" json:"supplier_id"`
 	}
 	UserRoles struct {
 		Resource []int `json:"resource_id" pg:"resource_id"`

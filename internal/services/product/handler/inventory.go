@@ -38,7 +38,7 @@ func (h *InventoryHandler) UpsertInventory(c *gin.Context) {
 	var (
 		err  error
 		res  = &model.GenericRes{}
-		req  = &productdetails.Product{}
+		req  = &inventory.Inventory{}
 		dCtx = context.Background()
 	)
 	defer func() {
@@ -69,7 +69,7 @@ func (h *InventoryHandler) FetchInventory(c *gin.Context) {
 	var (
 		err  error
 		res  = &model.GenericRes{}
-		req  = &productdetails.Product{}
+		req  = model.Filter{}
 		dCtx = context.Background()
 	)
 	defer func() {
@@ -84,13 +84,13 @@ func (h *InventoryHandler) FetchInventory(c *gin.Context) {
 		res.Message = err.Error()
 		return
 	}
-	err = h.invertoryService.FetchInventoryByFilter(dCtx, req)
+	data, err := h.invertoryService.FetchInventoryByFilter(dCtx, req)
 	if err != nil {
 		err = er.New(err, er.UncaughtException).SetStatus(http.StatusServiceUnavailable)
 		return
 	}
 	res.Message = "Success"
-	res.Data = req
+	res.Data = data
 	res.Success = true
 	c.JSON(http.StatusOK, res)
 }

@@ -42,9 +42,12 @@ func NewDBRepository(i NewRepositoryIn) (Repo Repository, err error) {
 
 // IsActive checks if DB is connected
 func (r *PGRepo) upsertSuppliers(ctx context.Context, suppliers *Supplier) error {
-	return nil
+	_, err := r.db.ModelContext(ctx, suppliers).OnConflict("(supplier_name) DO UPDATE").Insert()
+	return err
 }
 
-func (r *PGRepo) fetchSuppliers(ctx context.Context, Filter model.Filter) (suppliers []Supplier, err error) {
-	return nil, nil
+func (r *PGRepo) fetchSuppliers(ctx context.Context, Filter model.Filter) ([]Supplier, error) {
+	suppliers := []Supplier{}
+	err := r.db.ModelContext(ctx, &suppliers).Where("id=?", Filter.SupplierID).Select()
+	return suppliers, err
 }

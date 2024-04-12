@@ -18,8 +18,9 @@ type (
 	// Discount represents a discount applicable to a product
 	Discount struct {
 		ID            int
-		ProductID     int // Foreign key referencing Product entity
+		ProductID     int
 		DiscountType  string
+		CouponCode    string
 		DiscountValue float64
 		IsActive      bool
 		CreatedAt     time.Time

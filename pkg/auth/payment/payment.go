@@ -11,3 +11,5 @@ var Module = fx.Options(
 		NewService,
 	),
 )
+
+type ()

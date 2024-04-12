@@ -6,7 +6,6 @@ import (
 	"ecommerce_backend_project/internal/mw/jwt"
 	"ecommerce_backend_project/pkg/product/offermangement"
 	productdetails "ecommerce_backend_project/pkg/product/productDetails"
-	"ecommerce_backend_project/pkg/product/suppliers"
 	model "ecommerce_backend_project/utils/models"
 	"net/http"
 
@@ -68,11 +67,10 @@ func (h *OfferHandler) UpsertOfferDetails(c *gin.Context) {
 }
 
 func (h *OfferHandler) FetchOfferDetails(c *gin.Context) {
-
 	var (
 		err  error
 		res  = &model.GenericRes{}
-		req  = &suppliers.Supplier{}
+		req  = model.Filter{}
 		dCtx = context.Background()
 	)
 	defer func() {
@@ -88,13 +86,13 @@ func (h *OfferHandler) FetchOfferDetails(c *gin.Context) {
 		return
 	}
 
-	err = h.offerService.FetchOfferByFilter(dCtx, req)
+	data, err := h.offerService.FetchOfferByFilter(dCtx, req)
 	if err != nil {
 		err = er.New(err, er.UncaughtException).SetStatus(http.StatusServiceUnavailable)
 		return
 	}
 	res.Message = "Success"
-	res.Data = req
+	res.Data = data
 	res.Success = true
 	c.JSON(http.StatusOK, res)
 }
