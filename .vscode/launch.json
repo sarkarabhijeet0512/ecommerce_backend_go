@@ -5,11 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Server",
+            "name": "auth_server",
             "type": "go",
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/cmd/auth/",
+            "env": {
+              "MODE": "server",
+            },
+            "args": [],
+          },
+          {
+            "name": "product_server",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/cmd/product/",
             "env": {
               "MODE": "server",
             },

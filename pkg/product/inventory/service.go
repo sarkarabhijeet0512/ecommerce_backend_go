@@ -1,6 +1,9 @@
-package dummy
+package inventory
 
 import (
+	"context"
+	model "ecommerce_backend_project/utils/models"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -21,6 +24,9 @@ func NewService(conf *viper.Viper, log *logrus.Logger, Repo Repository) *Service
 }
 
 // IsDBActive gets user data by her userID
-func (s *Service) IsActive() (bool, error) {
-	return s.Repo.IsActive()
+func (s *Service) UpsertInventory(ctx context.Context, inventory *Inventory) error {
+	return s.Repo.upsertInventory(ctx, inventory)
+}
+func (s *Service) FetchInventoryByFilter(ctx context.Context, filter model.Filter) ([]Inventory, error) {
+	return s.Repo.fetchInventoryByFilter(ctx, filter)
 }

@@ -1,4 +1,4 @@
-package dummy
+package orderitems
 
 import (
 	"github.com/sirupsen/logrus"

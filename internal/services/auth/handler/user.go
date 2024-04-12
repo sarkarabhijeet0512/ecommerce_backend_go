@@ -5,8 +5,10 @@ import (
 	"ecommerce_backend_project/er"
 	"ecommerce_backend_project/internal/mw/jwt"
 	"ecommerce_backend_project/pkg/auth/user"
+	"ecommerce_backend_project/pkg/cache"
 	"fmt"
 	"net/http"
+	"time"
 
 	model "ecommerce_backend_project/utils/models"
 
@@ -18,17 +20,20 @@ type UserHandler struct {
 	log           *logrus.Logger
 	jwtMiddleware *jwt.GinJWTMiddleware
 	userService   *user.Service
+	cacheService  *cache.Service
 }
 
 func newUserHandler(
 	log *logrus.Logger,
 	userService *user.Service,
+	cacheService *cache.Service,
 ) *UserHandler {
 	c := &gin.Context{}
 	return &UserHandler{
 		log,
 		jwt.SetAuthMiddleware(userService.Repo.GetDBConnection(c)),
 		userService,
+		cacheService,
 	}
 }
 
@@ -88,17 +93,17 @@ func (h *UserHandler) UserLogin(c *gin.Context) {
 		return
 	}
 	if ok {
-		code, token, expire := h.jwtMiddleware.SetToken(c, user)
-
+		code, _, _ := h.jwtMiddleware.SetToken(c, user)
 		if code == 0 {
 			err = fmt.Errorf("jwt set token failed")
 			return
 		}
-		fmt.Println(token, expire)
-		// res.Code = code
-		// res.Token = token
-		// res.Expire = &expire
-		// res.Success = success
+		err := h.cacheService.Repo.Set(fmt.Sprint(user.ID), nil, 10*time.Hour)
+		if err != nil {
+			err = er.New(err, er.UserNotFound).SetStatus(http.StatusNotFound)
+			return
+		}
+		res.Success = true
 		c.JSON(http.StatusOK, res)
 		return
 	}
