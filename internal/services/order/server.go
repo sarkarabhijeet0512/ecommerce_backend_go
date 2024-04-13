@@ -1,15 +1,21 @@
 package server
 
 import (
+	"ecommerce_backend_project/internal/mw"
+	"ecommerce_backend_project/internal/mw/jwt"
+	"ecommerce_backend_project/pkg/cache"
+	"ecommerce_backend_project/utils/types"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-pg/pg/v10"
+	"github.com/gomodule/redigo/redis"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	ginlogrus "github.com/toorop/gin-logrus"
 	"go.uber.org/fx"
-	"gorm.io/gorm"
 )
 
 // Module invokes mainserver
@@ -27,10 +33,11 @@ const (
 type Options struct {
 	fx.In
 
-	Config *viper.Viper
-	Log    *logrus.Logger
-
-	MysqlDB *gorm.DB `name:"pointoDB"`
+	Config       *viper.Viper
+	Log          *logrus.Logger
+	PostgresDB   *pg.DB      `name:"userdb"`
+	Redis        *redis.Pool `name:"redisWorker"`
+	CacheService *cache.Service
 }
 
 // Run starts the mainserver REST API server
@@ -44,21 +51,19 @@ func SetupRouter(o *Options) (router *gin.Engine) {
 	gin.SetMode(gin.ReleaseMode)
 	router = gin.New()
 
-	// Add a ginzap middleware, which:
-	//   - Logs all requests, like a combined access and error log.
-	//   - Logs to stdout.
-	//   - RFC3339 with UTC time format.
-
 	// Logs all panic to error log
 	router.Use(ginlogrus.Logger(o.Log), gin.Recovery())
 
 	// Health routes
+	router.Use(mw.RateLimiter(10, time.Minute))
+	authMiddleware := jwt.SetAuthMiddleware(o.PostgresDB)
+	router.Use(mw.ErrorHandlerX(o.Log))
+	router.Use(mw.RoleCheckMiddleware(o.CacheService, types.ORDERMANGEMENT))
 	router.GET("/_healthz", HealthHandler(o))
 	router.GET("/_readyz", HealthHandler(o))
-
 	rootRouter := router.Group("/")
 
-	v1Routes(rootRouter, o)
+	v1Routes(rootRouter, authMiddleware, o)
 
 	return
 }
@@ -66,17 +71,13 @@ func SetupRouter(o *Options) (router *gin.Engine) {
 // HealthHandler
 func HealthHandler(o *Options) func(*gin.Context) {
 	return func(c *gin.Context) {
-		var err error
-		db, err := o.MysqlDB.DB()
+		jwt.ExtractClaims(c)
+		err := o.PostgresDB.Ping(c)
 		if err != nil {
 			c.AbortWithError(http.StatusFailedDependency, err)
 			return
 		}
-		err = db.Ping()
-		if err != nil {
-			c.AbortWithError(http.StatusFailedDependency, err)
-			return
-		}
+
 		c.JSON(http.StatusOK, gin.H{"ok": "ok"})
 	}
 }
