@@ -29,4 +29,14 @@ type (
 	UserRoles struct {
 		Resource []int `json:"resource_id" pg:"resource_id"`
 	}
+	Message1 struct {
+		Key   string `json:"key"`
+		Value string `json:"value"`
+	}
+
+	Message2 struct {
+		ID    int    `json:"id"`
+		Name  string `json:"name"`
+		Email string `json:"email"`
+	}
 )

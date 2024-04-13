@@ -3,6 +3,7 @@ package inventory
 import (
 	"context"
 	model "ecommerce_backend_project/utils/models"
+	"sync"
 
 	"github.com/go-pg/pg/v10"
 	"github.com/sirupsen/logrus"
@@ -26,6 +27,7 @@ type NewRepositoryIn struct {
 type PGRepo struct {
 	log *logrus.Logger
 	db  *pg.DB
+	mu  sync.Mutex
 }
 
 // NewDBRepository returns a new persistence layer object which can be used for
@@ -39,7 +41,9 @@ func NewDBRepository(i NewRepositoryIn) (Repo Repository, err error) {
 }
 
 func (r *PGRepo) upsertInventory(ctx context.Context, inventory *Inventory) error {
+	r.mu.Lock()
 	_, err := r.db.ModelContext(ctx, inventory).OnConflict("(product_id) DO UPDATE").Insert()
+	r.mu.Unlock()
 	return err
 }
 func (r *PGRepo) fetchInventoryByFilter(ctx context.Context, filter model.Filter) ([]Inventory, error) {

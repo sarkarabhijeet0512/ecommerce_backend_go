@@ -1,6 +1,7 @@
 package inventory
 
 import (
+	"sync"
 	"time"
 
 	"go.uber.org/fx"
@@ -26,5 +27,6 @@ type (
 		IsActive          bool      `json:"is_active" pg:"is_active"`
 		CreatedAt         time.Time `json:"created_at" pg:"created_at"`
 		UpdatedAt         time.Time `json:"updated_at" pg:"updated_at"`
+		Mu                sync.Mutex
 	}
 )

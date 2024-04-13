@@ -34,4 +34,12 @@ type (
 		CreatedAt         time.Time              `json:"created_at" pg:"created_at"`
 		UpdatedAt         time.Time              `json:"updated_at" pg:"updated_at"`
 	}
+	OrderLogs struct {
+		ID        int       `json:"id" pg:"id"`
+		OrderID   int       `json:"order_id" pg:"order_id"`
+		Status    string    `json:"status" pg:"status"`
+		IsActive  bool      `json:"is_active" pg:"is_active"`
+		CreatedAt time.Time `json:"created_at" pg:"created_at"`
+		UpdatedAt time.Time `json:"updated_at" pg:"updated_at"`
+	}
 )
